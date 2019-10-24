@@ -1,19 +1,14 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, h1, h2, text)
+import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Browser.Navigation as Navigation
 import Browser exposing (UrlRequest)
 import Url exposing (Url)
 import Url.Parser as UrlParser exposing ((</>), Parser, s, top)
-import Bootstrap.Navbar as Navbar
+import Bootstrap.Navbar as NavBar
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
-import Bootstrap.Card as Card
-import Bootstrap.Card.Block as Block
-import Bootstrap.Button as Button
-import Bootstrap.ListGroup as ListGroup
 import Bootstrap.Modal as Modal
 
 
@@ -23,14 +18,13 @@ type alias Flags =
 type alias Model =
     { navKey : Navigation.Key
     , page : Page
-    , navState : Navbar.State
+    , navState : NavBar.State
     , modalVisibility : Modal.Visibility
     }
 
 type Page
     = Home
-    | GettingStarted
-    | Modules
+    | About
     | NotFound
 
 
@@ -49,7 +43,7 @@ init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init _ url key =
     let
         ( navState, navCmd ) =
-            Navbar.initialState NavMsg
+            NavBar.initialState NavMsg
 
         ( model, urlCmd ) =
             urlUpdate url { navKey = key, navState = navState, page = Home, modalVisibility= Modal.hidden }
@@ -62,14 +56,14 @@ init _ url key =
 type Msg
     = UrlChange Url
     | ClickedLink UrlRequest
-    | NavMsg Navbar.State
+    | NavMsg NavBar.State
     | CloseModal
     | ShowModal
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Navbar.subscriptions model.navState NavMsg
+    NavBar.subscriptions model.navState NavMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -124,14 +118,13 @@ routeParser : Parser (Page -> a) a
 routeParser =
     UrlParser.oneOf
         [ UrlParser.map Home top
-        , UrlParser.map GettingStarted (s "getting-started")
-        , UrlParser.map Modules (s "modules")
+        , UrlParser.map About (s "about")
         ]
 
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Elm Bootstrap"
+    { title = "Elm Stopwatch"
     , body =
         [ div []
             [ menu model
@@ -142,18 +135,16 @@ view model =
     }
 
 
-
 menu : Model -> Html Msg
 menu model =
-    Navbar.config NavMsg
-        |> Navbar.withAnimation
-        |> Navbar.container
-        |> Navbar.brand [ href "#" ] [ text "Elm Bootstrap" ]
-        |> Navbar.items
-            [ Navbar.itemLink [ href "#getting-started" ] [ text "Getting started" ]
-            , Navbar.itemLink [ href "#modules" ] [ text "Modules" ]
+    NavBar.config NavMsg
+        |> NavBar.withAnimation
+        |> NavBar.container
+        |> NavBar.brand [ href "#" ] [ text "Elm Stopwatch" ]
+        |> NavBar.items
+            [ NavBar.itemLink [ href "#about" ] [ text "About" ]
             ]
-        |> Navbar.view model.navState
+        |> NavBar.view model.navState
 
 
 mainContent : Model -> Html Msg
@@ -163,11 +154,8 @@ mainContent model =
             Home ->
                 pageHome model
 
-            GettingStarted ->
-                pageGettingStarted model
-
-            Modules ->
-                pageModules model
+            About ->
+                pageAbout model
 
             NotFound ->
                 pageNotFound
@@ -175,57 +163,19 @@ mainContent model =
 
 pageHome : Model -> List (Html Msg)
 pageHome _ =
-    [ h1 [] [ text "Home" ]
+    [ h1 [] [ text "Stopwatch" ]
     , Grid.row []
         [ Grid.col []
-            [ Card.config [ Card.outlinePrimary ]
-                |> Card.headerH4 [] [ text "Getting started" ]
-                |> Card.block []
-                    [ Block.text [] [ text "Getting started is real easy. Just click the start button." ]
-                    , Block.custom <|
-                        Button.linkButton
-                            [ Button.primary, Button.attrs [ href "#getting-started" ] ]
-                            [ text "Start" ]
-                    ]
-                |> Card.view
-            ]
-        , Grid.col []
-            [ Card.config [ Card.outlineDanger ]
-                |> Card.headerH4 [] [ text "Modules" ]
-                |> Card.block []
-                    [ Block.text [] [ text "Check out the modules overview" ]
-                    , Block.custom <|
-                        Button.linkButton
-                            [ Button.primary, Button.attrs [ href "#modules" ] ]
-                            [ text "Module" ]
-                    ]
-                |> Card.view
+            [ text "TODO"
             ]
         ]
     ]
 
 
-pageGettingStarted : Model -> List (Html Msg)
-pageGettingStarted _ =
-    [ h2 [] [ text "Getting started" ]
-    , Button.button
-        [ Button.success
-        , Button.large
-        , Button.block
-        , Button.attrs [ onClick ShowModal ]
-        ]
-        [ text "Click me" ]
-    ]
-
-
-pageModules : Model -> List (Html Msg)
-pageModules _ =
-    [ h1 [] [ text "Modules" ]
-    , ListGroup.ul
-        [ ListGroup.li [] [ text "Alert" ]
-        , ListGroup.li [] [ text "Badge" ]
-        , ListGroup.li [] [ text "Card" ]
-        ]
+pageAbout : Model -> List (Html Msg)
+pageAbout _ =
+    [ h1 [] [ text "About" ]
+    , text "TODO: About VG soft and link to repo"
     ]
 
 
