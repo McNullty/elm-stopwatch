@@ -1,0 +1,7 @@
+= Elm Hello World project
+
+This project is used as a template for Lazybones project gor ELM starter project.
+It doesnt use connectors for REST api.
+
+== elm-live
+`elm-live src/main/elm/Main.elm --dir build/ --pushstate --open -- --output=build/elm.js`
