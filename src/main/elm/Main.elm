@@ -1,9 +1,10 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, h1, text)
+import Html exposing (Html, div, h1, h2, text)
 import Html.Attributes exposing (..)
 import Browser.Navigation as Navigation
 import Browser exposing (UrlRequest)
+import String exposing (concat, join)
 import Url exposing (Url)
 import Url.Parser as UrlParser exposing ((</>), Parser, s, top)
 import Bootstrap.Navbar as NavBar
@@ -172,11 +173,14 @@ mainContent model =
 
 
 pageHome : Model -> List (Html Msg)
-pageHome _ =
+pageHome model =
     [ h1 [] [ text "Stopwatch" ]
     , Grid.row []
         [ Grid.col []
-            [ text "TODO"
+            [ h2 [] [ text (model.numberOfSeconds
+                        |> secondsToTimeForDisplay
+                        |> timeForDisplayToString)
+                    ]
             ]
         ]
     ]
@@ -228,4 +232,18 @@ secondsToTimeForDisplay numberOfSeconds =
     , seconds = seconds
     }
 
-    
+
+timeForDisplayToString : TimeForDisplay -> String
+timeForDisplayToString timeForDisplay =
+    join ":" [ (convertToTimeFormat timeForDisplay.hours)
+             , (convertToTimeFormat timeForDisplay.minutes)
+             , (convertToTimeFormat timeForDisplay.seconds)
+             ]
+
+
+convertToTimeFormat : Int -> String
+convertToTimeFormat number =
+    if number < 10 then
+        concat ["0", (String.fromInt number)]
+    else
+        String.fromInt number
