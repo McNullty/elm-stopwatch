@@ -1,16 +1,17 @@
 module Main exposing (..)
 
+import Bootstrap.Button as Button
 import Html exposing (Html, div, h1, h2, text)
 import Html.Attributes exposing (..)
 import Browser.Navigation as Navigation
 import Browser exposing (UrlRequest)
+import Html.Events exposing (onClick)
 import String exposing (concat, join)
 import Time
 import Url exposing (Url)
 import Url.Parser as UrlParser exposing ((</>), Parser, s, top)
 import Bootstrap.Navbar as NavBar
 import Bootstrap.Grid as Grid
-import Bootstrap.Grid.Col as Col
 import Bootstrap.Modal as Modal
 
 
@@ -23,6 +24,7 @@ type alias Model =
     , navState : NavBar.State
     , modalVisibility : Modal.Visibility
     , numberOfSeconds : Int
+    , timerStarted : Bool
     }
 
 type alias TimeForDisplay =
@@ -60,6 +62,7 @@ init _ url key =
                           , page = Home
                           , modalVisibility = Modal.hidden
                           , numberOfSeconds = 0
+                          , timerStarted = False
                           }
     in
         ( model, Cmd.batch [ urlCmd, navCmd ] )
@@ -69,16 +72,19 @@ type Msg
     = UrlChange Url
     | ClickedLink UrlRequest
     | NavMsg NavBar.State
-    | CloseModal
-    | ShowModal
     | Tick Time.Posix
+    | StartTimer
+    | StopTimer
+    | LapTimer
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ NavBar.subscriptions model.navState NavMsg
-        , Time.every 1000 Tick
+        , case model.timerStarted of
+            True -> Time.every 1000 Tick
+            False -> Sub.none
         ]
 
 
@@ -101,16 +107,6 @@ update msg model =
             , Cmd.none
             )
 
-        CloseModal ->
-            ( { model | modalVisibility = Modal.hidden }
-            , Cmd.none
-            )
-
-        ShowModal ->
-            ( { model | modalVisibility = Modal.shown }
-            , Cmd.none
-            )
-
         Tick _->
             let
                 nos = model.numberOfSeconds
@@ -118,6 +114,23 @@ update msg model =
                 ( { model | numberOfSeconds = nos + 1}
                 , Cmd.none
                 )
+
+
+        StartTimer ->
+            ( { model | timerStarted = True }
+            , Cmd.none
+            )
+
+
+        StopTimer ->
+            ( { model | timerStarted = False }
+            , Cmd.none
+            )
+
+
+        LapTimer ->
+            ( model, Cmd.none)
+
 
 
 
@@ -152,7 +165,6 @@ view model =
         [ div []
             [ menu model
             , mainContent model
-            , modal model
             ]
         ]
     }
@@ -193,6 +205,18 @@ pageHome model =
                         |> secondsToTimeForDisplay
                         |> timeForDisplayToString)
                     ]
+            , Button.button
+                    [ Button.primary
+                    , Button.large
+                    , Button.attrs [ onClick (messageFromButton model) ]
+                    ]
+                    [ text (titleForButton model) ]
+            , Button.button
+                    [ Button.secondary
+                    , Button.large
+                    , Button.attrs [ onClick StopTimer ]
+                    ]
+                    [ text "Stop" ]
             ]
         ]
     ]
@@ -211,25 +235,6 @@ pageNotFound =
     , text "Sorry couldn't find that page"
     ]
 
-
-modal : Model -> Html Msg
-modal model =
-    Modal.config CloseModal
-        |> Modal.small
-        |> Modal.h4 [] [ text "Getting started ?" ]
-        |> Modal.body []
-            [ Grid.containerFluid []
-                [ Grid.row []
-                    [ Grid.col
-                        [ Col.xs6 ]
-                        [ text "Col 1" ]
-                    , Grid.col
-                        [ Col.xs6 ]
-                        [ text "Col 2" ]
-                    ]
-                ]
-            ]
-        |> Modal.view model.modalVisibility
 
 
 secondsToTimeForDisplay : Int -> TimeForDisplay
@@ -259,3 +264,15 @@ convertToTimeFormat number =
         concat ["0", (String.fromInt number)]
     else
         String.fromInt number
+
+titleForButton : Model -> String
+titleForButton model =
+    case model.timerStarted of
+        True -> "Lap"
+        False -> "Start"
+
+messageFromButton : Model -> Msg
+messageFromButton model =
+    case model.timerStarted of
+        True -> LapTimer
+        False -> StartTimer
