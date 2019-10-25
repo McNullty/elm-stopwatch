@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Browser.Navigation as Navigation
 import Browser exposing (UrlRequest)
 import String exposing (concat, join)
+import Time
 import Url exposing (Url)
 import Url.Parser as UrlParser exposing ((</>), Parser, s, top)
 import Bootstrap.Navbar as NavBar
@@ -70,11 +71,15 @@ type Msg
     | NavMsg NavBar.State
     | CloseModal
     | ShowModal
+    | Tick Time.Posix
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    NavBar.subscriptions model.navState NavMsg
+    Sub.batch
+        [ NavBar.subscriptions model.navState NavMsg
+        , Time.every 1000 Tick
+        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -87,7 +92,6 @@ update msg model =
 
                  Browser.External href ->
                      ( model, Navigation.load href )
-
 
         UrlChange url ->
             urlUpdate url model
@@ -106,6 +110,14 @@ update msg model =
             ( { model | modalVisibility = Modal.shown }
             , Cmd.none
             )
+
+        Tick _->
+            let
+                nos = model.numberOfSeconds
+            in
+                ( { model | numberOfSeconds = nos + 1}
+                , Cmd.none
+                )
 
 
 
