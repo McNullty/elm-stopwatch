@@ -20,6 +20,13 @@ type alias Model =
     , page : Page
     , navState : NavBar.State
     , modalVisibility : Modal.Visibility
+    , numberOfSeconds : Int
+    }
+
+type alias TimeForDisplay =
+    { hours : Int
+    , minutes : Int
+    , seconds : Int
     }
 
 type Page
@@ -46,11 +53,14 @@ init _ url key =
             NavBar.initialState NavMsg
 
         ( model, urlCmd ) =
-            urlUpdate url { navKey = key, navState = navState, page = Home, modalVisibility= Modal.hidden }
+            urlUpdate url { navKey = key
+                          , navState = navState
+                          , page = Home
+                          , modalVisibility = Modal.hidden
+                          , numberOfSeconds = 0
+                          }
     in
         ( model, Cmd.batch [ urlCmd, navCmd ] )
-
-
 
 
 type Msg
@@ -204,3 +214,18 @@ modal model =
                 ]
             ]
         |> Modal.view model.modalVisibility
+
+
+secondsToTimeForDisplay : Int -> TimeForDisplay
+secondsToTimeForDisplay numberOfSeconds =
+    let
+        hours = numberOfSeconds // 3600
+        minutes = (numberOfSeconds - (hours * 3600))  // 60
+        seconds = modBy 60 numberOfSeconds
+    in
+    { hours = hours
+    , minutes = minutes
+    , seconds = seconds
+    }
+
+    
