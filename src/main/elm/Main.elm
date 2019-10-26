@@ -127,9 +127,13 @@ update msg model =
 
 
         StopTimer ->
-            ( { model | timerStarted = False }
-            , Cmd.none
-            )
+            let
+                nos = model.numberOfSeconds
+                oldTimes = model.times
+            in
+                ( { model | timerStarted = False, times = nos :: oldTimes }
+                , Cmd.none
+                )
 
 
         LapTimer ->
@@ -141,7 +145,7 @@ update msg model =
 
 
         ResetTimer ->
-            ( { model | numberOfSeconds = 0 }
+            ( { model | numberOfSeconds = 0, times = [] }
             , Cmd.none
             )
 
