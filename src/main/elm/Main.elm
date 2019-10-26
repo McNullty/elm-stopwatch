@@ -232,7 +232,7 @@ pageHome model =
         [ Grid.col []
             [ h2 [] [text "Laps:"]
             , ListGroup.ul
-                (List.map (\time -> ListGroup.li [] [ text (String.fromInt time)]) model.times)
+                (List.map (\time -> ListGroup.li [] [ text (timeForDisplayToString (secondsToTimeForDisplay time))]) model.times)
             ]
         ]
     ]
