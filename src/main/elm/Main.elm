@@ -76,6 +76,7 @@ type Msg
     | StartTimer
     | StopTimer
     | LapTimer
+    | ResetTimer
 
 
 subscriptions : Model -> Sub Msg
@@ -131,6 +132,11 @@ update msg model =
         LapTimer ->
             ( model, Cmd.none)
 
+
+        ResetTimer ->
+            ( { model | numberOfSeconds = 0 }
+            , Cmd.none
+            )
 
 
 
@@ -211,12 +217,8 @@ pageHome model =
                     , Button.attrs [ onClick (messageFromButton model) ]
                     ]
                     [ text (titleForButton model) ]
-            , Button.button
-                    [ Button.secondary
-                    , Button.large
-                    , Button.attrs [ onClick StopTimer ]
-                    ]
-                    [ text "Stop" ]
+            , showStopButtonIfNeeded model
+            , showResetButtonIfNeeded model
             ]
         ]
     ]
@@ -276,3 +278,28 @@ messageFromButton model =
     case model.timerStarted of
         True -> LapTimer
         False -> StartTimer
+
+
+showStopButtonIfNeeded : Model -> Html Msg
+showStopButtonIfNeeded model =
+    case model.timerStarted of
+        True -> Button.button
+                    [ Button.secondary
+                    , Button.large
+                    , Button.attrs [ onClick StopTimer ]
+                    ]
+                    [ text "Stop" ]
+        False -> text ""
+
+
+showResetButtonIfNeeded : Model -> Html Msg
+showResetButtonIfNeeded model =
+    if model.timerStarted == False && model.numberOfSeconds > 0 then
+        Button.button
+            [ Button.secondary
+            , Button.large
+            , Button.attrs [ onClick ResetTimer ]
+            ]
+            [ text "Reset" ]
+    else
+        text ""
