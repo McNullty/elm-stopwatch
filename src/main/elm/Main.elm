@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Bootstrap.Button as Button
+import Bootstrap.ListGroup as ListGroup
 import Html exposing (Html, div, h1, h2, text)
 import Html.Attributes exposing (..)
 import Browser.Navigation as Navigation
@@ -25,6 +26,7 @@ type alias Model =
     , modalVisibility : Modal.Visibility
     , numberOfSeconds : Int
     , timerStarted : Bool
+    , times : List Int
     }
 
 type alias TimeForDisplay =
@@ -63,6 +65,7 @@ init _ url key =
                           , modalVisibility = Modal.hidden
                           , numberOfSeconds = 0
                           , timerStarted = False
+                          , times = []
                           }
     in
         ( model, Cmd.batch [ urlCmd, navCmd ] )
@@ -130,7 +133,11 @@ update msg model =
 
 
         LapTimer ->
-            ( model, Cmd.none)
+            let
+                nos = model.numberOfSeconds
+                oldTimes = model.times
+            in
+                ( {model | times = nos :: oldTimes} , Cmd.none)
 
 
         ResetTimer ->
@@ -219,6 +226,13 @@ pageHome model =
                     [ text (titleForButton model) ]
             , showStopButtonIfNeeded model
             , showResetButtonIfNeeded model
+            ]
+        ]
+    , Grid.row []
+        [ Grid.col []
+            [ h2 [] [text "Laps:"]
+            , ListGroup.ul
+                (List.map (\time -> ListGroup.li [] [ text (String.fromInt time)]) model.times)
             ]
         ]
     ]
