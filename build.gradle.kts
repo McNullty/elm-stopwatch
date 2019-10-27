@@ -1,4 +1,6 @@
 tasks.register<Exec>("build") {
+    dependsOn("copyResources")
+
     val jsPath = "$projectDir/build/elm.js"
 
     inputs.dir("$projectDir/src/")
@@ -18,7 +20,6 @@ tasks.register<Copy>("copyResources") {
 }
 
 tasks.register<Delete>("clean") {
-    delete.add("elm/elm-stuff/0.19.0")
-    delete.add("elm/elm-stuff/generated-code")
+    delete.add("elm/elm-stuff")
     delete.add("build")
 }
