@@ -20,6 +20,15 @@
 
 <script src="elm.js"></script>
 <script>
+    window.onload = () => {
+        'use strict';
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker
+                .register('./sw.js');
+        }
+    }
+
     var element = document.getElementById("elm-code-is-loaded-here");
 
     const app = Elm.Main.init({
