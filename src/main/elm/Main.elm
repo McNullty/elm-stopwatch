@@ -24,7 +24,7 @@ type alias Model =
     , page : Page
     , navState : NavBar.State
     , modalVisibility : Modal.Visibility
-    , numberOfSeconds : Int
+    , numberOfCentiSeconds : Int
     , timerStarted : Bool
     , times : List Int
     }
@@ -33,6 +33,7 @@ type alias TimeForDisplay =
     { hours : Int
     , minutes : Int
     , seconds : Int
+    , centiSeconds: Int
     }
 
 type Page
@@ -63,7 +64,7 @@ init _ url key =
                           , navState = navState
                           , page = Home
                           , modalVisibility = Modal.hidden
-                          , numberOfSeconds = 0
+                          , numberOfCentiSeconds = 0
                           , timerStarted = False
                           , times = []
                           }
@@ -87,7 +88,7 @@ subscriptions model =
     Sub.batch
         [ NavBar.subscriptions model.navState NavMsg
         , case model.timerStarted of
-            True -> Time.every 1000 Tick
+            True -> Time.every 100 Tick
             False -> Sub.none
         ]
 
@@ -113,9 +114,9 @@ update msg model =
 
         Tick _->
             let
-                nos = model.numberOfSeconds
+                nos = model.numberOfCentiSeconds
             in
-                ( { model | numberOfSeconds = nos + 1}
+                ( { model | numberOfCentiSeconds = nos + 1}
                 , Cmd.none
                 )
 
@@ -128,7 +129,7 @@ update msg model =
 
         StopTimer ->
             let
-                nos = model.numberOfSeconds
+                nos = model.numberOfCentiSeconds
                 oldTimes = model.times
             in
                 ( { model | timerStarted = False, times = nos :: oldTimes }
@@ -138,14 +139,14 @@ update msg model =
 
         LapTimer ->
             let
-                nos = model.numberOfSeconds
+                nos = model.numberOfCentiSeconds
                 oldTimes = model.times
             in
                 ( {model | times = nos :: oldTimes} , Cmd.none)
 
 
         ResetTimer ->
-            ( { model | numberOfSeconds = 0, times = [] }
+            ( { model | numberOfCentiSeconds = 0, times = [] }
             , Cmd.none
             )
 
@@ -218,7 +219,7 @@ pageHome model =
     [ h1 [] [ text "Stopwatch" ]
     , Grid.row []
         [ Grid.col []
-            [ h2 [] [ text (model.numberOfSeconds
+            [ h2 [] [ text (model.numberOfCentiSeconds
                         |> secondsToTimeForDisplay
                         |> timeForDisplayToString)
                     ]
@@ -260,15 +261,17 @@ pageNotFound =
 
 
 secondsToTimeForDisplay : Int -> TimeForDisplay
-secondsToTimeForDisplay numberOfSeconds =
+secondsToTimeForDisplay numberOfMilliSeconds =
     let
-        hours = numberOfSeconds // 3600
-        minutes = (numberOfSeconds - (hours * 3600))  // 60
-        seconds = modBy 60 numberOfSeconds
+        hours = numberOfMilliSeconds // (10 * 60 * 60)
+        minutes =  modBy 60 (numberOfMilliSeconds // (10 * 60))
+        seconds = modBy 60 (numberOfMilliSeconds // 10)
+        centiSeconds = modBy 10 numberOfMilliSeconds
     in
     { hours = hours
     , minutes = minutes
     , seconds = seconds
+    , centiSeconds = centiSeconds
     }
 
 
@@ -277,6 +280,7 @@ timeForDisplayToString timeForDisplay =
     join ":" [ (convertToTimeFormat timeForDisplay.hours)
              , (convertToTimeFormat timeForDisplay.minutes)
              , (convertToTimeFormat timeForDisplay.seconds)
+             , (String.fromInt timeForDisplay.centiSeconds)
              ]
 
 
@@ -314,7 +318,7 @@ showStopButtonIfNeeded model =
 
 showResetButtonIfNeeded : Model -> Html Msg
 showResetButtonIfNeeded model =
-    if model.timerStarted == False && model.numberOfSeconds > 0 then
+    if model.timerStarted == False && model.numberOfCentiSeconds > 0 then
         Button.button
             [ Button.secondary
             , Button.large
