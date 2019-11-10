@@ -1,4 +1,6 @@
 tasks.register<Exec>("buildElm") {
+    description = "Builds JavaScript file for testing"
+    group = BasePlugin.BUILD_GROUP
 
     val jsPath = "$projectDir/build/elm.js"
 
@@ -11,7 +13,6 @@ tasks.register<Exec>("buildElm") {
 
 tasks.register<Exec>("buildElmOptimize") {
 
-
     val jsPath = "$projectDir/build/elm.js"
 
     inputs.dir("$projectDir/src/")
@@ -23,6 +24,9 @@ tasks.register<Exec>("buildElmOptimize") {
 
 
 tasks.register<Exec>("build") {
+    description = "Builds JavaScript file for deploy"
+    group = BasePlugin.BUILD_GROUP
+
     dependsOn("buildElmOptimize")
     dependsOn("copyResources")
     finalizedBy("deleteElmJs")
@@ -49,6 +53,9 @@ tasks.register<Copy>("copyResources") {
 }
 
 tasks.register<Delete>("clean") {
+    description = "Cleans working directories"
+    group = BasePlugin.CLEAN_TASK_NAME
+
     delete.add("elm/elm-stuff")
     delete.add("build")
 }
