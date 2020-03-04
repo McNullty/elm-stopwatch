@@ -1,6 +1,6 @@
 = Elm Hello World project
 
-This project is used as a template for Lazybones project gor ELM starter project.
+This project is used as a template for Lazybones project for ELM starter project.
 It doesnt use connectors for REST api.
 
 == elm-live
